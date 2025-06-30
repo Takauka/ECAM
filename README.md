@@ -12,8 +12,8 @@
 </p>
 
 ECAM (Environmental Collision Avoidance Module) is
-a contrastive learning-based module to enhance collision
-avoidance ability with the environment, of trajectory forecasting models.
+a contrastive learning-based module to enhance environmental collision
+avoidance ability of trajectory forecasting models.
 It can be integrated into existing models, improving their ability to generate
 collision-free trajectories, with zero overhead during inference.
 
