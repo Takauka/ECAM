@@ -21,7 +21,7 @@ collision-free trajectories, with zero overhead during inference.
   <br>
   <img src="assets/ECAM-comparison.png" alt="ECAM qualitative comparison" width=60%>
   <br>
-  <img src="assets/ECAM-diagram.png" alt="ECAM diagram" width=90%>
+  <img src="assets/ECAM-diagram.jpg" alt="ECAM diagram" width=90%>
 </div>
 
 ## Setup
