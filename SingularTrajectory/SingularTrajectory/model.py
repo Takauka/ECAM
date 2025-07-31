@@ -521,4 +521,3 @@ class SingularTrajectory(nn.Module):
                             pred_T2[:, 1].cpu().numpy(), color)
 
             plt.show()
-
