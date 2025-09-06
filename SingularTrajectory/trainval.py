@@ -1,12 +1,22 @@
 import os
-import argparse
-
+import pickle
 import torch
-
+import numpy as np
+from tqdm import tqdm
 import baseline
 from SingularTrajectory import *
 from utils import *
 
+# -----------------------------------------------------------------------------
+# ログ設定のための簡易的な設定
+# -----------------------------------------------------------------------------
+import logging
+# --- NEW: タイムスタンプとファイルコピーのためにインポート ---
+from datetime import datetime
+import shutil
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -17,10 +27,10 @@ if __name__ == '__main__':
     parser.add_argument('--test', default=False, action='store_true', help="evaluation mode")
     args = parser.parse_args()
 
-    print("===== Arguments =====")
+    logger.info("===== Arguments =====")
     print_arguments(vars(args))
 
-    print("===== Configs =====")
+    logger.info("===== Configs =====")
     hyper_params = get_exp_config(args.cfg)
     print_arguments(hyper_params)
 
@@ -35,11 +45,40 @@ if __name__ == '__main__':
     trainer = ModelTrainer(base_model=PredictorModel, model=SingularTrajectory, hook_func=hook_func,
                            args=args, hyper_params=hyper_params, device=args.device)
 
+    # --- NEW: Override the checkpoint directory to save/load from ./model/ECAM/ ---
+    # This ensures models are saved in a consistent, user-specified location.
+    save_directory = os.path.join('.', 'model', 'ECAM')
+    trainer.checkpoint_dir = save_directory
+    logger.info(f"モデルの保存/読み込み先を '{save_directory}' に変更しました。")
+    
+    # Ensure the directory exists before training starts
+    if not args.test and not os.path.exists(save_directory):
+        os.makedirs(save_directory)
+        logger.info(f"モデル保存ディレクトリを作成しました: {save_directory}")
+
+
     if not args.test:
         trainer.init_descriptor()
         trainer.fit()
+
+        # --- NEW: Create a timestamped backup of the best model after training ---
+        logger.info("バックアップを作成しています...")
+        best_model_path = os.path.join(save_directory, 'model_best.pth')
+        if os.path.exists(best_model_path):
+            try:
+                now = datetime.now()
+                timestamped_filename = f'model_best_{now.strftime("%Y%m%d_%H%M%S")}.pth'
+                backup_path = os.path.join(save_directory, timestamped_filename)
+                shutil.copy(best_model_path, backup_path)
+                logger.info(f"✅ ベストモデルのバックアップを '{backup_path}' に作成しました。")
+            except Exception as e:
+                logger.warning(f"⚠️ モデルのバックアップ作成に失敗しました: {e}")
+        else:
+            logger.warning("⚠️ ベストモデルファイルが見つからなかったため、バックアップは作成されませんでした。")
+
     else:
+        # --- MODIFIED: load_model will now use the overridden path ---
         trainer.load_model()
-        print("Testing...", end=' ')
+        logger.info("Testing...")
         results = trainer.test()
-        print(f"Scene: {hyper_params.dataset}", *[f"{meter}: {value:.8f}" for meter, value in results.items()])
+        logger.info(f"Scene: {hyper_params.dataset} " + " ".join([f"{meter}: {value:.4f}" for meter, value in results.items()]))
