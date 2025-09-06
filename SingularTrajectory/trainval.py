@@ -45,9 +45,9 @@ if __name__ == '__main__':
     trainer = ModelTrainer(base_model=PredictorModel, model=SingularTrajectory, hook_func=hook_func,
                            args=args, hyper_params=hyper_params, device=args.device)
 
-    # --- NEW: Override the checkpoint directory to save/load from ./model/ECAM/ ---
+    # --- MODIFIED: Override the checkpoint directory to save/load from ./model/ ---
     # This ensures models are saved in a consistent, user-specified location.
-    save_directory = os.path.join('.', 'model', 'ECAM')
+    save_directory = os.path.join('.', 'model')
     trainer.checkpoint_dir = save_directory
     logger.info(f"モデルの保存/読み込み先を '{save_directory}' に変更しました。")
     
