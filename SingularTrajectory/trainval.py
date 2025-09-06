@@ -14,6 +14,8 @@ import logging
 # --- NEW: タイムスタンプとファイルコピーのためにインポート ---
 from datetime import datetime
 import shutil
+# --- FIX: argparseをインポート ---
+import argparse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -82,3 +84,5 @@ if __name__ == '__main__':
         logger.info("Testing...")
         results = trainer.test()
         logger.info(f"Scene: {hyper_params.dataset} " + " ".join([f"{meter}: {value:.4f}" for meter, value in results.items()]))
+
+
